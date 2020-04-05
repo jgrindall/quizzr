@@ -1,17 +1,29 @@
 const express = require('express');
+//const socketio = require('socket.io');
+const bodyParser = require('body-parser');
 const app = express();
-const http = require('http');
-const socketio = require('socket.io');
-
-const sockets = {}
-
-const getStuff = ()=>{
-    return [1, 2, 3, 4, 5, 6];
-};
-
+const PORT = 8082;
+//const sockets = {};
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 app.use(express.static('dist'));
 
-app.use(function(req, res, next) {
+const authenticate = (req)=>{
+  const b64auth = (req.headers.authorization || '').split(' ')[1] || '';
+  const [login, password] = Buffer.from(b64auth, 'base64').toString().split(':');
+  return (login === 'john' && password === 'john');
+};
+
+const requireAuth = (req, res, next) => {
+  if(authenticate(req)){
+    return next();
+  }
+  res.set('WWW-Authenticate', 'Basic realm="401"');
+  res.status(401).send('Authentication required.');
+  return false;
+};
+
+app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "http://localhost:8081");
     res.header("Access-Control-Allow-Headers", "X-Requested-With");
     res.header("Access-Control-Allow-Headers", "Content-Type");
@@ -20,12 +32,29 @@ app.use(function(req, res, next) {
     next();
 });
 
-app.get('/', (req, res) => {
-    res.send('An alligator approaches!');
+app.post('/login', (req, res)=>{
+  const {username, password} = req.body;
+  if(username === 'john' && password === 'john'){
+    res.status(200).send({message:'Success'});
+  }
+  else{
+    res.status(401).send({message:'Authentication required'});
+  }
 });
 
-const server = app.listen(3000, () => console.log('Gator app listening on port 3000!'));
+app.get("/list", (req, res)=>{
+  res.status(200).send('stuff');
+});
 
+app.get("/listmore", requireAuth, (req, res)=>{
+  res.status(200).send('more stuff');
+});
+
+const server = app.listen(PORT, () =>{
+  console.log('listening...', PORT);
+});
+
+/*
 const io = socketio.listen(server, {log:false, origins:'*:*'});
 
 io.on('connection', function(socket){
@@ -34,6 +63,7 @@ io.on('connection', function(socket){
     socket.emit('files', getStuff());
     socket.on('disconnect', () => {
       delete sockets[socket.id];
-    });  
+    });
 });
+ */
 

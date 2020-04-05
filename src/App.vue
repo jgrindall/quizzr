@@ -1,16 +1,15 @@
 <template>
   <div id="app">
-    <img src="./assets/logo.png">
+    <router-link to="/login">Home</router-link>
     <router-view/>
   </div>
 </template>
 
 <script>
 
-const SOCKET_URL = 'localhost:3000';
-
-const io = require('socket.io-client');
-const socket = io(SOCKET_URL);
+//const SOCKET_URL = 'localhost:3000';
+//const io = require('socket.io-client');
+//const socket = io(SOCKET_URL);
 
 export default {
   name: 'App'
@@ -18,12 +17,7 @@ export default {
 </script>
 
 <style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+  #app {
+
+  }
 </style>
